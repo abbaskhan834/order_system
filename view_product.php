@@ -309,7 +309,7 @@ Swal.fire({
 ?>
 
 </script>
-
+<!----------------SHOW UPDATED MSG----------------->
 <?php 
  if (isset($_GET['msg']) && $_GET['msg'] == 'updated') { ?>
 <script>
