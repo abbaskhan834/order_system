@@ -3,6 +3,7 @@ include 'config/conn.php';
 
 $query = "SELECT orders.*, `products`.`name` AS product_name, `products`.`price` AS product_price,
 `orders`.`qty` * `products`.`price` AS total_price  FROM `products` JOIN `orders` ON `orders`.`product_id` = `products`.`id`;";
+
 $stmt = $conn->prepare($query);
 $stmt->execute(); 
  ?>
@@ -233,9 +234,12 @@ $stmt->execute();
             <th>Total Price</th>
             <th>Qty</th>
             <th>Order Date</th>
+            <th>Edit</th>
           </tr>
           <?php
           $count = 1;
+          $page = "view_order.php";
+          $table = "orders";
       while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
              // print_r($row);
 
@@ -252,7 +256,9 @@ $stmt->execute();
             <td><?= $row['total_price']  ?></td>
             <td><?= $row['qty']  ?></td>
             <td><?= $row['order_date']  ?></td>
-            
+            <td><a href=""><i class="fa fa-edit"></i></a>
+              <a href="generic_delete.php?id=<?= $row['id'] ?>&page=<?= ($page)?>&table=<?= ($table) ?>"><i class="fa fa-trash" style="color: red"></i></a>
+            </td>
             
           </tr>
           <?php

@@ -232,8 +232,9 @@ $stmt->execute();
                 </thead>
                <tbody>
                 <?php
-                 $page = "view_product.php";
                  $count = 1;
+                 $page = "view_product.php";
+                 $table = "products";
                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                            
                          
@@ -244,7 +245,7 @@ $stmt->execute();
                <td><?= $row['price'] ?></td>
                  <td><img src="product_img/<?= $row['image'] ?>"></td>
                   <td><a href="update_products.php?id=<?= $row['id'] ?>"class=""><i class="fa fa-edit"></i></a>
-               <a href="generic_delete.php?id=<?= $row['id'] ?>&page=<?=($page) ?>" style="color: red" onclick="return deleteConfirm(this);"><i class="fa fa-trash" ></i></a>
+               <a href="generic_delete.php?id=<?= $row['id'] ?>&page=<?=($page) ?>&table=<?= ($page) ?>" style="color: red" onclick="return deleteConfirm(this);"><i class="fa fa-trash" ></i></a>
                         </tr>
                        
                       </tbody>
