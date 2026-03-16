@@ -1,11 +1,55 @@
 <?php
 include 'config/conn.php';
+$id = $_GET['id'];
 
-$query = "SELECT orders.*, `products`.`name` AS product_name, `products`.`price` AS product_price,
-`orders`.`qty` * `products`.`price` AS total_price  FROM `products` JOIN `orders` ON `orders`.`product_id` = `products`.`id`;";
+$page = $_GET['page'];
+$table = $_GET['table'];
 
-$stmt = $conn->prepare($query);
-$stmt->execute(); 
+
+
+$id = $_GET['id'];
+
+$selectQuery = "
+SELECT orders.*, 
+       `products`.`name` AS `product_name`, 
+       `products`.`price` AS `product_price`,
+       (`orders`.`qty` * `products`.`price`) AS `total_price`
+FROM `orders`
+JOIN products ON `orders`.`product_id` = `products`.`id`
+WHERE `orders`.`id` = :id
+";
+
+$stmt = $conn->prepare($selectQuery);
+$stmt->execute([':id' => $id]);
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+
+if (isset($_POST['update'])) {
+
+  $customerName = $_POST['customer_name'];  
+  $phone = $_POST['phone'];
+  $address = $_POST['address'];
+  $productId = $_POST['product_id'];
+  $qty = $_POST['qty'];
+  $orderDate = $_POST['order_date'];
+  $productPrice = $_POST['price'];
+  $totalPrice = $_POST['total_price'];
+
+ 
+$updateQuery = "UPDATE orders SET customer_name = :customer_name, phone = :phone, address = :address, product_id = :product_id, qty = :qty, order_date = :order_date where id = :id;";
+$stmt = $conn->prepare($updateQuery);
+$stmt->execute([
+  ':customer_name' => $customerName,
+  ':phone' => $phone,
+  ':address' => $address,
+  ':product_id' => $productId,
+  ':qty' => $qty,
+  ':order_date' => $orderDate,
+  ':id' => $id
+]);
+header("Location: $page?msg=updated");
+}
  ?>
 
 
@@ -221,51 +265,34 @@ $stmt->execute();
       <div class="main-panel mt-5">
         <div class="content-wrapper">
 
-        <table class="table">
-        <thead>
+          
 
-          <tr>
-            <th>Id</th>
-            <th>Customer Name</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th>Total Price</th>
-            <th>Qty</th>
-            <th>Order Date</th>
-            <th>Edit</th>
-          </tr>
-          <?php
-          $count = 1;
-          $page = "view_orders.php";
-          $table = "orders";
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-             // print_r($row);
+         <form method="post" class="form-control">
+          <fieldset>
+        <label for="name">Customer Name</label>
+          <input type="text" name="customer_name" value="<?= $row['customer_name'] ?>">
+          <label for="name">Phone</label>
+          <input type="text" name="phone" value="<?= $row['phone'] ?>">
+          <label for="address">Address</label>
+          <input type="text" name="address" value="<?= $row['address'] ?>">
+          <br>
+          <label for="product_id">Product id</label>
 
-             // exit;
-           
-           ?>
-          <tr>
-            <td><?= $count++?></td>
-            <td><?= $row['customer_name']  ?></td>
-            <td><?= $row['phone']  ?></td>
-            <td><?= $row['address']  ?></td>
-            <td><?= $row['product_name']  ?></td>
-            <td><?= $row['product_price']  ?></td>
-            <td><?= $row['total_price']  ?></td>
-            <td><?= $row['qty']  ?></td>
-            <td><?= $row['order_date']  ?></td>
-            <td><a href="update_view_orders.php?id=<?= $row['id']?>&page=<?= ($page) ?>&table=<?= ($table) ?>"><i class="fa fa-edit"></i></a>
-              <a href="generic_delete.php?id=<?= $row['id'] ?>&page=<?= ($page)?>&table=<?= ($table) ?>"><i class="fa fa-trash" style="color: red"></i></a>
-            </td>
-            
-          </tr>
-          <?php
-          }  
-           ?>
-        </thead>
-      </table>
+          <input type="text" name="product_id" value="<?= $row['product_id'] ?>">
+
+          <label for="price">Price</label>
+          <input type="text" name="price" value="<?= $row['product_price'] ?>">
+          <label for="price">Total Price</label>
+          <input type="text" name="total_price" value="<?= $row['total_price'] ?>">
+          <br>
+          <label for="qty">qty</label>
+          <input type="text" name="qty" value="<?= $row['qty'] ?>">
+         
+          <label for="date">date</label>
+          <input type="text" name="order_date" value="<?= $row['order_date'] ?>">
+          </fieldset>
+          <button class="btn btn-success mx-4" name="update">Update</button>
+         </form>
          
 
           
@@ -291,17 +318,4 @@ $stmt->execute();
 </body>
 
 </html>
-</script>
-<!----------------SHOW UPDATED MSG----------------->
-<?php 
- if (isset($_GET['msg']) && $_GET['msg'] == 'updated') { ?>
-<script>
 
-Swal.fire({
-  icon: 'success',
-  title: 'Updated!',
-  text: 'Data updated successfully',
-  confirmButtonColor: '#28a745'
-});
-</script>
-<?php } ?>
