@@ -1,14 +1,3 @@
-<?php
-include 'config/conn.php';
-
-$query = "SELECT orders.*, `products`.`name` AS product_name, `products`.`price` AS product_price,
-`orders`.`qty` * `products`.`price` AS total_price  FROM `products` JOIN `orders` ON `orders`.`product_id` = `products`.`id`;";
-
-$stmt = $conn->prepare($query);
-$stmt->execute(); 
- ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -221,51 +210,10 @@ $stmt->execute();
       <div class="main-panel mt-5">
         <div class="content-wrapper">
 
-        <table class="table">
-        <thead>
+          
 
-          <tr>
-            <th>Id</th>
-            <th>Customer Name</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th>Total Price</th>
-            <th>Qty</th>
-            <th>Order Date</th>
-            <th>Edit</th>
-          </tr>
-          <?php
-          $count = 1;
-          $page = "view_orders.php";
-          $table = "orders";
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-             // print_r($row);
-
-             // exit;
-           
-           ?>
-          <tr>
-            <td><?= $count++?></td>
-            <td><?= $row['customer_name']  ?></td>
-            <td><?= $row['phone']  ?></td>
-            <td><?= $row['address']  ?></td>
-            <td><?= $row['product_name']  ?></td>
-            <td><?= $row['product_price']  ?></td>
-            <td><?= $row['total_price']  ?></td>
-            <td><?= $row['qty']  ?></td>
-            <td><?= $row['order_date']  ?></td>
-            <td><a href="update_view_orders.php?id=<?= $row['id']?>&page=<?= ($page) ?>&table=<?= ($table) ?>"><i class="fa fa-edit"></i></a>
-              <a href="generic_delete.php?id=<?= $row['id'] ?>&page=<?= ($page)?>&table=<?= ($table) ?>" onclick="return deleteConfirm(this);"><i class="fa fa-trash" style="color: red" ></i></a>
-            </td>
-            
-          </tr>
-          <?php
-          }  
-           ?>
-        </thead>
-      </table>
+         
+		<h1>WELLCOME</h1>
          
 
           
@@ -291,58 +239,4 @@ $stmt->execute();
 </body>
 
 </html>
-</script>
-<!----------------SHOW UPDATED MSG----------------->
-<?php 
- if (isset($_GET['msg']) && $_GET['msg'] == 'updated') { ?>
-<script>
 
-Swal.fire({
-  icon: 'success',
-  title: 'Updated!',
-  text: 'Data updated successfully',
-  confirmButtonColor: '#28a745'
-});
-</script>
-<?php } ?>
-
-<script>
-
- 
-
-function deleteConfirm(el) {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: "you want to delete data!",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      window.location.href = el.href; 
-    }
-  });
-
-  return false;   
-}
-</script>
-
- </script>
-<!----------------SHOW DELETED MSG----------------->
-<?php 
- if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') { ?>
-<script>
-
-Swal.fire({
-  icon: 'success',
-  title: 'Deleted!',
-  text: 'Data deleted successfully',
-  confirmButtonColor: '#28a745'
-});
-</script>
-<?php } ?>
-
-<script>

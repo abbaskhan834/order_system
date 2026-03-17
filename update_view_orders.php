@@ -10,11 +10,8 @@ $table = $_GET['table'];
 $id = $_GET['id'];
 
 $selectQuery = "
-SELECT orders.*, 
-       `products`.`name` AS `product_name`, 
-       `products`.`price` AS `product_price`,
-       (`orders`.`qty` * `products`.`price`) AS `total_price`
-FROM `orders`
+SELECT orders.*, `products`.`name` AS `product_name`, `products`.`price` AS `product_price`,
+  (`orders`.`qty` * `products`.`price`) AS `total_price`FROM `orders`
 JOIN products ON `orders`.`product_id` = `products`.`id`
 WHERE `orders`.`id` = :id
 ";

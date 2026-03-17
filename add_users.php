@@ -1,13 +1,53 @@
 <?php
+// khan123
 include 'config/conn.php';
 
-$query = "SELECT orders.*, `products`.`name` AS product_name, `products`.`price` AS product_price,
-`orders`.`qty` * `products`.`price` AS total_price  FROM `products` JOIN `orders` ON `orders`.`product_id` = `products`.`id`;";
+if (isset($_POST['addusers'])) {
 
-$stmt = $conn->prepare($query);
-$stmt->execute(); 
+   $userName = $_POST['name'];
+   $userEmail = $_POST['email'];
+   $userPassword = $_POST['password'];
+   $userPassword = password_hash($userPassword, PASSWORD_BCRYPT);
+   $userPhone = $_POST['phone'];
+
+   $uploadDir = __DIR__ . '/user_img/';
+
+    if(!is_dir($uploadDir)){
+        mkdir($uploadDir, 0777, true);
+    }
+
+    if(!is_writable($uploadDir)){
+        die("Error: user_img folder is not writable.");
+    }
+
+    $targetFile = null;
+
+    if(isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK){
+        $baseName = basename($_FILES['picture']['name']);
+        $targetFile = time().'_'.uniqid().'_'.$baseName;
+
+        if(!move_uploaded_file($_FILES['picture']['tmp_name'], $uploadDir.$targetFile)){
+            die("File upload failed!");
+        }
+    }
+
+try {
+  $conn->beginTransaction();
+   $insertQuery = "INSERT INTO users(name, email, password, phone, picture)VALUES(:name, :email, :password, :phone, :picture);";
+   $stmt = $conn->prepare($insertQuery);
+   $stmt->execute([
+    ':name' => $userName,
+    ':email' => $userEmail,
+    ':password' => $userPassword,
+    ':phone' => $userPhone,
+    ':picture' => $targetFile
+   ]);
+   $conn->commit();
+ } catch (Exception $e) {
+   $conn->rollback();
+ } 
+  }
  ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -221,51 +261,38 @@ $stmt->execute();
       <div class="main-panel mt-5">
         <div class="content-wrapper">
 
-        <table class="table">
-        <thead>
+          
 
-          <tr>
-            <th>Id</th>
-            <th>Customer Name</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th>Total Price</th>
-            <th>Qty</th>
-            <th>Order Date</th>
-            <th>Edit</th>
-          </tr>
-          <?php
-          $count = 1;
-          $page = "view_orders.php";
-          $table = "orders";
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-             // print_r($row);
+          <form method="post" enctype="multipart/form-data">
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  Add Users
+</button>
 
-             // exit;
-           
-           ?>
-          <tr>
-            <td><?= $count++?></td>
-            <td><?= $row['customer_name']  ?></td>
-            <td><?= $row['phone']  ?></td>
-            <td><?= $row['address']  ?></td>
-            <td><?= $row['product_name']  ?></td>
-            <td><?= $row['product_price']  ?></td>
-            <td><?= $row['total_price']  ?></td>
-            <td><?= $row['qty']  ?></td>
-            <td><?= $row['order_date']  ?></td>
-            <td><a href="update_view_orders.php?id=<?= $row['id']?>&page=<?= ($page) ?>&table=<?= ($table) ?>"><i class="fa fa-edit"></i></a>
-              <a href="generic_delete.php?id=<?= $row['id'] ?>&page=<?= ($page)?>&table=<?= ($table) ?>" onclick="return deleteConfirm(this);"><i class="fa fa-trash" style="color: red" ></i></a>
-            </td>
-            
-          </tr>
-          <?php
-          }  
-           ?>
-        </thead>
-      </table>
+<!-- Modal -->
+<div class="modal fade mt-5 mx-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Users</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" name="name" class="form-control" placeholder="User Name...">
+        <input type="email" name="email" class="form-control" placeholder="User Email...">
+        <input type="password" name="password" class="form-control" placeholder="User Password...">
+         <input type="number" name="phone" class="form-control" placeholder="User Phone...">
+        <input type="file" name="picture" class="form-control" >
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" name="addusers" class="btn btn-primary">Add User</button>
+      </div>
+    </div>
+  </div>
+</div>
+      </form>
          
 
           
@@ -291,58 +318,4 @@ $stmt->execute();
 </body>
 
 </html>
-</script>
-<!----------------SHOW UPDATED MSG----------------->
-<?php 
- if (isset($_GET['msg']) && $_GET['msg'] == 'updated') { ?>
-<script>
 
-Swal.fire({
-  icon: 'success',
-  title: 'Updated!',
-  text: 'Data updated successfully',
-  confirmButtonColor: '#28a745'
-});
-</script>
-<?php } ?>
-
-<script>
-
- 
-
-function deleteConfirm(el) {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: "you want to delete data!",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      window.location.href = el.href; 
-    }
-  });
-
-  return false;   
-}
-</script>
-
- </script>
-<!----------------SHOW DELETED MSG----------------->
-<?php 
- if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') { ?>
-<script>
-
-Swal.fire({
-  icon: 'success',
-  title: 'Deleted!',
-  text: 'Data deleted successfully',
-  confirmButtonColor: '#28a745'
-});
-</script>
-<?php } ?>
-
-<script>
